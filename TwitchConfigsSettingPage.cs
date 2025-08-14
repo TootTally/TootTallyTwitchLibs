@@ -24,10 +24,10 @@ namespace TootTallyTwitchLibs
 
         private static ColorBlock GetButtonColors => new ColorBlock()
         {
-            normalColor = new Color(.20f, .20f, 1),
-            highlightedColor = new Color(.15f, .15f, .65f),
-            pressedColor = new Color(.5f, .5f, .75f),
-            selectedColor = new Color(.20f, .20f, 1),
+            normalColor = new Color(.57f, .0f, 1f),
+            highlightedColor = new Color(.53f, 0f, .9f),
+            pressedColor = new Color(.25f, 0f, .5f),
+            selectedColor = new Color(.57f, .0f, 1f),
             fadeDuration = .08f,
             colorMultiplier = 1
         };

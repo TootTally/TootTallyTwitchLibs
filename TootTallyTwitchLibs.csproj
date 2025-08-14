@@ -3,12 +3,13 @@
 	<PropertyGroup>
 		<TargetFramework>net48</TargetFramework>
 		<AssemblyName>TootTallyTwitchLibs</AssemblyName>
-		<Description>TootTally Module Template</Description>
-		<Version>0.1.0</Version>
+		<Description>TootTally's Twitch Libs API</Description>
+		<Version>1.0.0</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 		<TromboneChampDir>E:\SteamLibrary\steamapps\common\TromboneChamp</TromboneChampDir>
 		<TromboneTootDir>C:\Users\Sabz\AppData\Roaming\r2modmanPlus-local\TromboneChamp\profiles\Default</TromboneTootDir>
+		<SolutionDir>E:\Visual Studio Projects\Beat Saber Project\TootTallyTwitchLibs\</SolutionDir>
 	</PropertyGroup>
 
 	<ItemGroup>

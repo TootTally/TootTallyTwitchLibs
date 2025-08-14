@@ -63,6 +63,7 @@ namespace TootTallyTwitchLibs
             }
 
             settingPage = TootTallySettingsManager.AddNewPage(new TwitchConfigsSettingPage());
+            TootTallySettings.Plugin.TryAddThunderstoreIconToPageButton(Instance.Info.Location, Name, settingPage);
             //_harmony.PatchAll(typeof(TwitchIntegrationManager));
             _twitchController = gameObject.AddComponent<TwitchIntegrationController>();
             _twitchController.Init();

@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TootTallyCore.Utils.TootTallyNotifs;
-using TwitchLib.Api.Helix.Models.Search;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Events;
-using TwitchLib.Communication.Interfaces;
 using TwitchLib.Communication.Models;
 using UnityEngine;
-using static TootTallyTwitchLibs.Plugin;
 
 namespace TootTallyTwitchLibs
 {
@@ -27,7 +20,7 @@ namespace TootTallyTwitchLibs
         public bool IsReady => IsLogged && IsConnected && HasJoinedChannel;
         
         private TwitchClient _client;
-        private TwitchConfigVariables _config;
+        private Plugin.TwitchConfigVariables _config;
         private ConcurrentStack<string> _messageStack;
 
         public Action OnUpdate;
@@ -93,14 +86,14 @@ namespace TootTallyTwitchLibs
             IsConnectionPending = false;
         }
 
-        private bool IsConfigValid(TwitchConfigVariables config)
+        private bool IsConfigValid(Plugin.TwitchConfigVariables config)
         {
-            if (config.TwitchChannelName == null || config.TwitchChannelName == DEFAULT_TWITCH_NAME)
+            if (config.TwitchChannelName == null || config.TwitchChannelName == Plugin.DEFAULT_TWITCH_NAME)
             {
                 TootTallyNotifManager.DisplayError("Twitch Username is empty. Please fill it in.");
                 return false;
             }
-            if (config.AccessToken == null || config.AccessToken == DEFAULT_ACCESS_TOKEN)
+            if (config.AccessToken == null || config.AccessToken == Plugin.DEFAULT_ACCESS_TOKEN)
             {
                 TootTallyNotifManager.DisplayError("Twitch Access Token is empty. Please fill it in.");
                 return false;
