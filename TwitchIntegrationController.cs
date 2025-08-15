@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using TootTallyCore.Utils.TootTallyNotifs;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
@@ -18,7 +19,7 @@ namespace TootTallyTwitchLibs
         public bool HasJoinedChannel { get; private set; }
         public bool IsConnected => _client != null && _client.IsConnected;
         public bool IsReady => IsLogged && IsConnected && HasJoinedChannel;
-        
+
         private TwitchClient _client;
         private Plugin.TwitchConfigVariables _config;
         private ConcurrentStack<string> _messageStack;
@@ -32,25 +33,17 @@ namespace TootTallyTwitchLibs
         public Action<object, OnErrorEventArgs> OnError;
         public Action<object, OnDisconnectedEventArgs> OnDisconnected;
 
-        public void Init()
+        public void Awake()
         {
-            IsConnectionPending = false;
-            IsLogged = false;
-            HasJoinedChannel = false;
-            _config = Plugin.Instance.ConfigVariables;
-            if (!IsConfigValid(_config)) return;
-
-            ConnectionCredentials credentials = new ConnectionCredentials(_config.TwitchChannelName, _config.AccessToken);
+            if (_client != null) return;
             var clientOptions = new ClientOptions()
             {
                 MessagesAllowedInPeriod = 750,
                 ThrottlingPeriod = TimeSpan.FromSeconds(30),
-                ReconnectionPolicy = new ReconnectionPolicy(reconnectInterval: 5, maxAttempts: 3)
+                ReconnectionPolicy = new ReconnectionPolicy(reconnectInterval: 5, maxAttempts: 3),
             };
             WebSocketClient webSocketClient = new WebSocketClient(clientOptions);
             _client = new TwitchClient(webSocketClient);
-            _client.Initialize(credentials, _config.TwitchChannelName);
-
             _client.OnLog += ClientOnLoggin;
             _client.OnJoinedChannel += ClientOnJoinedChannel;
             _client.OnConnected += ClientOnConnected;
@@ -58,17 +51,36 @@ namespace TootTallyTwitchLibs
             _client.OnIncorrectLogin += ClientOnIncorrectLogin;
             _client.OnError += ClientOnError;
             _client.OnDisconnected += ClientOnDisconnected;
-
             _messageStack = new ConcurrentStack<string>();
-
-            if (!IsConnected)
-            {
-                IsConnectionPending = true;
-                _client.Connect();
-            }
         }
 
-        private void Update()
+        public void Init()
+        {
+            IsConnectionPending = false;
+            IsLogged = false;
+            HasJoinedChannel = false;
+            _config = Plugin.Instance.ConfigVariables;
+            //_client?.Disconnect();
+            if (!IsConfigValid(_config)) return;
+
+            if (_client.ConnectionCredentials != null && (_client.ConnectionCredentials.TwitchUsername != _config.TwitchChannelName || _client.ConnectionCredentials.TwitchOAuth != _config.AccessToken))
+                _client.SetConnectionCredentials(new ConnectionCredentials(_config.TwitchChannelName, _config.AccessToken));
+            else if (_client.ConnectionCredentials == null)
+                _client.Initialize(new ConnectionCredentials(_config.TwitchChannelName, _config.AccessToken), _config.TwitchChannelName);
+            /*if (!_client.IsInitialized)
+                _client.Initialize(credentials, _config.TwitchChannelName);
+            else
+            {
+                _client.SetConnectionCredentials(credentials);
+                if (!_client.JoinedChannels.Any(channelName => channelName.Channel == _config.TwitchChannelName))
+                    _client.JoinChannel(_config.TwitchChannelName);
+            }*/
+
+            IsConnectionPending = true;
+            _client.Connect();
+        }
+
+        public void Update()
         {
             OnUpdate?.Invoke();
         }
@@ -101,7 +113,7 @@ namespace TootTallyTwitchLibs
             return true;
         }
 
-        private void ClientOnChatCommandReceived(object sender, OnChatCommandReceivedArgs args) 
+        private void ClientOnChatCommandReceived(object sender, OnChatCommandReceivedArgs args)
         {
             OnChatCommandReceived?.Invoke(sender, args);
         }

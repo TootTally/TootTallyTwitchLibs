@@ -61,12 +61,15 @@ namespace TootTallyTwitchLibs
                 ConfigVariables.SetTwitchChannelName(DEFAULT_TWITCH_NAME, false);
                 ConfigVariables.SetAccessToken(DEFAULT_ACCESS_TOKEN);
             }
+            else
+            {
+                Plugin.LogInfo($"Config file found with {ConfigVariables.AccessToken} and {ConfigVariables.TwitchChannelName}");
+            }
 
-            settingPage = TootTallySettingsManager.AddNewPage(new TwitchConfigsSettingPage());
+            _twitchController = gameObject.AddComponent<TwitchIntegrationController>();
+            settingPage = TootTallySettingsManager.AddNewPage(new TwitchConfigsSettingPage(_twitchController));
             TootTallySettings.Plugin.TryAddThunderstoreIconToPageButton(Instance.Info.Location, Name, settingPage);
             //_harmony.PatchAll(typeof(TwitchIntegrationManager));
-            _twitchController = gameObject.AddComponent<TwitchIntegrationController>();
-            _twitchController.Init();
             LogInfo($"Module loaded!");
         }
 
@@ -84,8 +87,8 @@ namespace TootTallyTwitchLibs
         [Serializable]
         public class TwitchConfigVariables
         {
-            public string TwitchChannelName { get; private set; }
-            public string AccessToken { get; private set; }
+            public string TwitchChannelName { get; set; }
+            public string AccessToken { get; set; }
 
             public void SetTwitchChannelName(string name, bool saveToFile = true)
             {

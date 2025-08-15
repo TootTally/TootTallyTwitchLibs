@@ -9,7 +9,6 @@
 		<LangVersion>latest</LangVersion>
 		<TromboneChampDir>E:\SteamLibrary\steamapps\common\TromboneChamp</TromboneChampDir>
 		<TromboneTootDir>C:\Users\Sabz\AppData\Roaming\r2modmanPlus-local\TromboneChamp\profiles\Default</TromboneTootDir>
-		<SolutionDir>E:\Visual Studio Projects\Beat Saber Project\TootTallyTwitchLibs\</SolutionDir>
 	</PropertyGroup>
 
 	<ItemGroup>
