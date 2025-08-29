@@ -14,13 +14,13 @@ namespace TootTallyTwitchLibs
 {
     public class TwitchIntegrationController : MonoBehaviour
     {
-        public bool IsLogged { get; private set; }
         public bool IsConnectionPending { get; private set; }
         public bool HasJoinedChannel { get; private set; }
         public bool IsConnected => _client != null && _client.IsConnected;
-        public bool IsReady => IsLogged && IsConnected && HasJoinedChannel;
+        public bool IsReady => IsConnected && HasJoinedChannel;
 
         private TwitchClient _client;
+        private WebSocketClient _websocketClient;
         private Plugin.TwitchConfigVariables _config;
         private ConcurrentStack<string> _messageStack;
 
@@ -42,8 +42,8 @@ namespace TootTallyTwitchLibs
                 ThrottlingPeriod = TimeSpan.FromSeconds(30),
                 ReconnectionPolicy = new ReconnectionPolicy(reconnectInterval: 5, maxAttempts: 3),
             };
-            WebSocketClient webSocketClient = new WebSocketClient(clientOptions);
-            _client = new TwitchClient(webSocketClient);
+            _websocketClient = new WebSocketClient(clientOptions);
+            _client = new TwitchClient(_websocketClient);
             _client.OnLog += ClientOnLoggin;
             _client.OnJoinedChannel += ClientOnJoinedChannel;
             _client.OnConnected += ClientOnConnected;
@@ -51,22 +51,27 @@ namespace TootTallyTwitchLibs
             _client.OnIncorrectLogin += ClientOnIncorrectLogin;
             _client.OnError += ClientOnError;
             _client.OnDisconnected += ClientOnDisconnected;
+            Plugin.LogDebug("Client setup done.");
             _messageStack = new ConcurrentStack<string>();
         }
 
         public void Init()
         {
             IsConnectionPending = false;
-            IsLogged = false;
             HasJoinedChannel = false;
             _config = Plugin.Instance.ConfigVariables;
-            //_client?.Disconnect();
             if (!IsConfigValid(_config)) return;
 
             if (_client.ConnectionCredentials != null && (_client.ConnectionCredentials.TwitchUsername != _config.TwitchChannelName || _client.ConnectionCredentials.TwitchOAuth != _config.AccessToken))
+            {
                 _client.SetConnectionCredentials(new ConnectionCredentials(_config.TwitchChannelName, _config.AccessToken));
+                Plugin.LogDebug("New credentials are set.");
+            }
             else if (_client.ConnectionCredentials == null)
+            {
                 _client.Initialize(new ConnectionCredentials(_config.TwitchChannelName, _config.AccessToken), _config.TwitchChannelName);
+                Plugin.LogDebug("Client is being initialized.");
+            }
             /*if (!_client.IsInitialized)
                 _client.Initialize(credentials, _config.TwitchChannelName);
             else
@@ -75,9 +80,7 @@ namespace TootTallyTwitchLibs
                 if (!_client.JoinedChannels.Any(channelName => channelName.Channel == _config.TwitchChannelName))
                     _client.JoinChannel(_config.TwitchChannelName);
             }*/
-
-            IsConnectionPending = true;
-            _client.Connect();
+            Connect();
         }
 
         public void Update()
@@ -90,11 +93,17 @@ namespace TootTallyTwitchLibs
             Disconnect();
         }
 
+        public void Connect()
+        {
+            IsConnectionPending = true;
+            Plugin.LogDebug("Client is trying to connect.");
+            _client.Connect();
+        }
+
         public void Disconnect()
         {
             if (IsConnected) _client.Disconnect();
             _messageStack?.Clear();
-            IsLogged = false;
             IsConnectionPending = false;
         }
 
@@ -110,6 +119,7 @@ namespace TootTallyTwitchLibs
                 TootTallyNotifManager.DisplayError("Twitch Access Token is empty. Please fill it in.");
                 return false;
             }
+            Plugin.LogDebug("Twitch Config is filled up.");
             return true;
         }
 
@@ -134,14 +144,13 @@ namespace TootTallyTwitchLibs
         private void ClientOnLoggin(object sender, OnLogArgs e)
         {
             Plugin.LogDebug($"{e.DateTime}: {e.BotUsername} - {e.Data}");
-            IsLogged = true;
             OnLoggin?.Invoke(sender, e);
         }
 
         private void ClientOnConnected(object sender, OnConnectedArgs e)
         {
             IsConnectionPending = false;
-            Plugin.LogInfo($"Connected to {e.AutoJoinChannel}");
+            Plugin.LogInfo($"Connected with {e.BotUsername}");
             OnConnected?.Invoke(sender, e);
         }
 
@@ -157,7 +166,6 @@ namespace TootTallyTwitchLibs
         private void ClientOnDisconnected(object sender, OnDisconnectedEventArgs e)
         {
             IsConnectionPending = false;
-            IsLogged = false;
             HasJoinedChannel = false;
             Plugin.LogInfo("Successfully disconnected from Twitch!");
             OnDisconnected?.Invoke(sender, e);

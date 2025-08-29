@@ -14,7 +14,7 @@ namespace TootTallyTwitchLibs
 {
     public class TwitchConfigsSettingPage : TootTallySettingPage
     {
-        private TwitchIntegrationController _twitchController;
+        private static TwitchIntegrationController _twitchController;
         private TootTallySettingTextField _channelNameInput, _accessTokenInput;
         private TootTallySettingButton _connectButton, _disconnectButton;
         private const string TOOTTALLY_TWITCH_LINK = "https://toottally.com/twitch/";
@@ -24,6 +24,7 @@ namespace TootTallyTwitchLibs
             _twitchController = controller;
             _twitchController.OnConnected += OnConnectShowDisconnectButton;
             _twitchController.OnDisconnected += OnDisconnectShowConnectButton;
+
             AddLabel("Twitch Channel Name");
             _channelNameInput = AddTextField("Twitch Channel Name", Plugin.Instance.ConfigVariables.TwitchChannelName, false, OnTwitchChannelNameEditSaveToPersistentTootTallyFile);
             AddLabel("Access Token");
@@ -31,6 +32,7 @@ namespace TootTallyTwitchLibs
             _connectButton = AddButton("Connect to Channel", OnConnectToChannelButtonPress);
             _disconnectButton = AddButton("Disconnect from Channel", OnDisconnectFromChannelButtonPress);
             AddButton("Get Access Token", OnGetAccessTokenButtonPress);
+            AddToggle("Enable Debug Mode", Plugin.Instance.DebugMode);
         }
 
         public override void Initialize()
@@ -39,6 +41,8 @@ namespace TootTallyTwitchLibs
             //_channelNameInput.inputField.text = Plugin.Instance.ConfigVariables.TwitchChannelName;
             //_accessTokenInput.inputField.text = Plugin.Instance.ConfigVariables.AccessToken;
             _twitchController.Init();
+            if (_twitchController.IsConnected)
+                OnConnectShowDisconnectButton(null, null);
         }
 
         private static ColorBlock GetButtonColors => new ColorBlock()

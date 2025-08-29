@@ -33,7 +33,11 @@ namespace TootTallyTwitchLibs
 
         public static void LogInfo(string msg) => Instance.Logger.LogInfo(msg);
         public static void LogError(string msg) => Instance.Logger.LogError(msg);
-        public static void LogDebug(string msg) => Instance.Logger.LogDebug(msg);
+        public static void LogDebug(string msg)
+        {
+            if (Instance.DebugMode.Value)
+                LogInfo($"Debug - {msg}");
+        }
 
         private void Awake()
         {
@@ -54,6 +58,7 @@ namespace TootTallyTwitchLibs
 
         public void LoadModule()
         {
+            DebugMode = Config.Bind(nameof(DebugMode), "DebugMode", false, "<color=red>WARNING: YOUR LOG WILL HAVE SENSITIVE DATA IF ENABLED.\nDO NOT SHARE YOUR LOGS PUBLICLY.</color>\nEnables extra logging for troubleshooting.");
             ConfigVariables = FileHelper.LoadFromTootTallyAppData<TwitchConfigVariables>(PERSISTENT_CONFIG_NAME);
             if (ConfigVariables == null)
             {
@@ -63,7 +68,7 @@ namespace TootTallyTwitchLibs
             }
             else
             {
-                Plugin.LogInfo($"Config file found with {ConfigVariables.AccessToken} and {ConfigVariables.TwitchChannelName}");
+                Plugin.LogDebug($"Config file found with {ConfigVariables.AccessToken} and {ConfigVariables.TwitchChannelName}");
             }
 
             _twitchController = gameObject.AddComponent<TwitchIntegrationController>();
@@ -83,6 +88,7 @@ namespace TootTallyTwitchLibs
         }
 
         public TwitchConfigVariables ConfigVariables { get; set; }
+        public ConfigEntry<bool> DebugMode { get; set; }
 
         [Serializable]
         public class TwitchConfigVariables
