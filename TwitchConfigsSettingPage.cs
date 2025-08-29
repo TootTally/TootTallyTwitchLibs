@@ -14,12 +14,12 @@ namespace TootTallyTwitchLibs
 {
     public class TwitchConfigsSettingPage : TootTallySettingPage
     {
-        private static TwitchIntegrationController _twitchController;
+        private static TwitchLibsController _twitchController;
         private TootTallySettingTextField _channelNameInput, _accessTokenInput;
         private TootTallySettingButton _connectButton, _disconnectButton;
         private const string TOOTTALLY_TWITCH_LINK = "https://toottally.com/twitch/";
 
-        public TwitchConfigsSettingPage(TwitchIntegrationController controller) : base("Twitch Configs", "Twitch Configs", 40f, new Color(0, 0, 0, .1f), GetButtonColors)
+        public TwitchConfigsSettingPage(TwitchLibsController controller) : base("Twitch Configs", "Twitch Configs", 40f, new Color(0, 0, 0, .1f), GetButtonColors)
         {
             _twitchController = controller;
             _twitchController.OnConnected += OnConnectShowDisconnectButton;

@@ -28,8 +28,8 @@ namespace TootTallyTwitchLibs
 
         public string Name { get => PluginInfo.PLUGIN_NAME; set => Name = value; }
 
-        public static TootTallySettingPage settingPage;
-        private static TwitchIntegrationController _twitchController;
+        public static TootTallySettingPage SettingPage;
+        public static TwitchLibsController TwitchController;
 
         public static void LogInfo(string msg) => Instance.Logger.LogInfo(msg);
         public static void LogError(string msg) => Instance.Logger.LogError(msg);
@@ -71,9 +71,9 @@ namespace TootTallyTwitchLibs
                 Plugin.LogDebug($"Config file found with {ConfigVariables.AccessToken} and {ConfigVariables.TwitchChannelName}");
             }
 
-            _twitchController = gameObject.AddComponent<TwitchIntegrationController>();
-            settingPage = TootTallySettingsManager.AddNewPage(new TwitchConfigsSettingPage(_twitchController));
-            TootTallySettings.Plugin.TryAddThunderstoreIconToPageButton(Instance.Info.Location, Name, settingPage);
+            TwitchController = gameObject.AddComponent<TwitchLibsController>();
+            SettingPage = TootTallySettingsManager.AddNewPage(new TwitchConfigsSettingPage(TwitchController));
+            TootTallySettings.Plugin.TryAddThunderstoreIconToPageButton(Instance.Info.Location, Name, SettingPage);
             //_harmony.PatchAll(typeof(TwitchIntegrationManager));
             LogInfo($"Module loaded!");
         }
@@ -81,9 +81,9 @@ namespace TootTallyTwitchLibs
         public void UnloadModule()
         {
             //_harmony.UnpatchSelf();
-            if (_twitchController != null)
-                GameObject.DestroyImmediate(_twitchController);
-            settingPage.Remove();
+            if (TwitchController != null)
+                GameObject.DestroyImmediate(TwitchController);
+            SettingPage.Remove();
             LogInfo($"Module unloaded!");
         }
 
